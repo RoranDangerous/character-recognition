@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
+var utils = require('./utils/utils');
 const app = express();
 
 app.use(express.static('public'));
@@ -12,14 +13,6 @@ app.get('/', function (req, res) {
 })
 
 app.post('/', function (req, res) {
-	fs.readFile('./public/data/temp.txt', 'utf8', function(err, contents) {
-		if(err){
-			console.log("Error:" + err);
-		}
-		else{
-			console.log(contents);
-		}
-	});
 	res.render('index');
   console.log(req.body);
 })
