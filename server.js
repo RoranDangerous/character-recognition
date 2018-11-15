@@ -1,6 +1,5 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const fs = require('fs');
 var utils = require('./utils/utils');
 const app = express();
 
@@ -14,9 +13,9 @@ app.get('/', function (req, res) {
 
 app.post('/', function (req, res) {
 	res.render('index');
-  console.log(req.body);
+	console.log(req.body);
 })
 
-app.listen(3000, function () {
-	console.log('Example app listening on port 3000!');
-})
+// app.listen(3000, function () {
+// 	console.log('Example app listening on port 3000!');
+// })
