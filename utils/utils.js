@@ -1,31 +1,56 @@
 const fs = require('fs');
-var dataFileBuffer = fs.readFileSync('emnist-digits-train-images-idx3-ubyte');
-var labelFileBuffer = fs.readFileSync('emnist-digits-train-labels-idx1-ubyte');
-var pixelValues = [];
 
-// It would be nice with a checker instead of a hard coded 60000 limit here
-var result = "";
-for(var i = 0; i < 100; i++){
-	result += dataFileBuffer[i]+" ";
-}
-console.log(result);
-console.log(labelFileBuffer.join(" ").substring(0, 208));
+const TYPE = {
+	IMAGES : 0,
+	LABELS : 1
+};
 
-for (var image = 0; image <= 2; image++) { 
-	var pixels = [];
+function parseDataset(filename, type=TYPE.IMAGES){
+	var fileBuffer = fs.readFileSync(filename);
 
-	for (var x = 0; x <= 27; x++) {
-			for (var y = 0; y <= 27; y++) {
-					pixels.push(dataFileBuffer[(image * 28 * 28) + (x + (y * 28)) + 15]);
-			}
+	var magicNumber = hexArrayToNumber(fileBuffer.slice(0,4));
+	var numItems = hexArrayToNumber(fileBuffer.slice(4,8));
+	var dims = {
+		height: 1,
+		width: 1
+	};
+	var startIndex = 8;
+
+	if(type == TYPE.IMAGES){
+		dims = {
+			height: hexArrayToNumber(fileBuffer.slice(8,12)),
+			width: hexArrayToNumber(fileBuffer.slice(12,16))
+		};
+		startIndex = 16;
 	}
 
-	var imageData  = {};
-	console.log(image);
-	imageData[JSON.stringify(labelFileBuffer[image + 8])] = pixels;
-	console.log(Object.keys(imageData));
+	fileBuffer = fileBuffer.slice(startIndex);
 
-	pixelValues.push(imageData);
+	var data = [];
+
+	for (var item = 0; item < numItems; item++) { 
+		var pixels = [];
+	
+		for (var x = 0; x < dims.height; x++) {
+				for (var y = 0; y < dims.width; y++) {
+						pixels.push(fileBuffer[(item * dims.height * dims.width) + (x + (y * 28))]);
+				}
+		}
+
+		data.push(pixels);
+	}
+
+	return { magicNumber: magicNumber, length: numItems, dims: dims, data: data};
 }
-console.log(pixelValues[0]['8'].toString());
-//console.log(Object.keys(pixelValues[0]));
+
+function hexArrayToNumber(hex){
+	var result = "0x";
+	for(var i = 0; i < hex.length; i++){
+		result += hex[i].toString(16);
+	}
+
+	return parseInt(result);
+}
+
+//parseDataset('emnist-digits-train-labels-idx1-ubyte', TYPE.LABELS);
+//parseDataset('emnist-digits-train-images-idx3-ubyte', TYPE.IMAGES);
