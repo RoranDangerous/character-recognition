@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-var utils = require('./utils/utils');
+var nn = require('./utils/neural-network');
 const app = express();
 
 app.use(express.static('public'));
@@ -19,3 +19,7 @@ app.post('/', function (req, res) {
 // app.listen(3000, function () {
 // 	console.log('Example app listening on port 3000!');
 // })
+
+//parseDataset('emnist-digits-train-labels-idx1-ubyte', TYPE.LABELS);
+//parseDataset('emnist-digits-train-images-idx3-ubyte', TYPE.IMAGES);
+console.log(new nn([2,2,1]).weights);

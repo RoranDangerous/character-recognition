@@ -52,5 +52,141 @@ function hexArrayToNumber(hex){
 	return parseInt(result);
 }
 
-//parseDataset('emnist-digits-train-labels-idx1-ubyte', TYPE.LABELS);
-//parseDataset('emnist-digits-train-images-idx3-ubyte', TYPE.IMAGES);
+function tanh(x){
+	return (1.0 - Math.exp(-2*x))/(1.0 + Math.exp(-2*x))
+}
+
+function tanh_derivative(x){
+	return (1 + tanh(x))*(1 - tanh(x))
+}
+
+function rand(rows, cols){
+	var result = [];
+	for(var i = 0; i < rows; i++){
+		var arr = [];
+		for(var j = 0; j < cols; j++){
+			arr.push(2*Math.random() - 1);
+		}
+		result.push(arr);
+	}
+	return result;
+}
+
+function ones(x1, x2){
+	var result = [];
+	for(var i = 0; i < x1; i++){
+		var arr = [];
+		for(var j = 0; j < x2; i++){
+			arr.push(1);
+		}
+		result.push(arr);
+	}
+	return result;
+}
+
+function transpose(array){
+	var result = [];
+
+	for(var i = 0; i < array[0].length; i++){
+		var arr = [];
+		for(var j = 0; j < array.length; j++){
+			arr.push(array[i][j]);
+		}
+		result.push(arr);
+	}
+
+	return result;
+}
+
+function concatenate(arr1, arr2){
+	var result = [];
+
+	for(var i = 0; i < arr1.length; i++){
+		var arr = [];
+		for(var j = 0; j < arr1[i].length; j++){
+			arr.push(arr1[i][j]);
+		}
+		for(var j = 0; j < arr2[i].length; j++){
+			arr.push(arr2[i][j]);
+		}
+		result.push(arr);
+	}
+
+	return result;
+}
+
+function multiply(a, b){
+	var aNumRows = a.length, aNumCols = a[0].length,
+		bNumRows = b.length, bNumCols = b[0].length,
+		m = new Array(aNumRows);
+
+	var dims = {
+		cols: aNumCols == undefined ? 0 : aNumCols,
+		rows: bNumCols == undefined ? 0 : bNumCols 
+	}
+
+	if(dims.cols == 0 && dims.rows == 0){
+		return multiplyOneByOne(a, b);
+	}
+
+	if(dims.cols == 0 || dims.rows == 0){
+		return multiplyTwoByOne(a, b);
+	}
+	for (var r = 0; r < aNumRows; ++r) {
+		m[r] = new Array(bNumCols);
+		for (var c = 0; c < bNumCols; ++c) {
+			m[r][c] = 0;
+			for (var i = 0; i < aNumCols; ++i) {
+				m[r][c] += a[r][i] * b[i][c];
+			}
+		}
+	}
+	return m;
+}
+
+function multiplyOneByOne(a, b){
+	if(a.length != b.length){
+		throw "Dimensions don't match: "+a.length+" != "+b.length;
+	}
+	var result = 0;
+	for(var i = 0 ; i < a.length; i++){
+		result += a[i] * b[i];
+	}
+
+	return result;
+}
+
+function multiplyTwoByOne(a, b){
+	var result = [];
+	if(a[0].length == undefined){
+		var temp = a;
+		a = b;
+		b = temp;
+	}
+
+	if(a[0].length != b.length){
+		throw "Dimensions don't match: "+a[0].length+" != "+b.length;
+	}
+
+	for(var i = 0; i < a.length; i++){
+		var sum = 0;
+		for(var j = 0; j < a[0].length; j++){
+			sum += a[i][j] * b[j];
+		}
+		result.push(sum);
+	}
+
+	return result;
+}
+
+module.exports = {
+	multiply: multiply,
+	type: TYPE,
+	parseDataset: parseDataset,
+	concatenate: concatenate,
+	transpose: transpose,
+	ones: ones,
+	tanh: tanh,
+	tanh_derivative: tanh_derivative,
+	rand: rand
+};
