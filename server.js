@@ -22,4 +22,3 @@ app.post('/', function (req, res) {
 
 //parseDataset('emnist-digits-train-labels-idx1-ubyte', TYPE.LABELS);
 //parseDataset('emnist-digits-train-images-idx3-ubyte', TYPE.IMAGES);
-console.log(new nn([2,2,1]).weights);

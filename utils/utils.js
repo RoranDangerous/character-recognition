@@ -53,11 +53,20 @@ function hexArrayToNumber(hex){
 }
 
 function tanh(x){
-	return (1.0 - Math.exp(-2*x))/(1.0 + Math.exp(-2*x))
+	var result = [];
+	for(var i = 0; i < x.length; i++){
+		result.push((1.0 - Math.exp(-2 * x[i])) / (1.0 + Math.exp(-2 * x[i])));
+	}
+	return result;
 }
 
 function tanh_derivative(x){
-	return (1 + tanh(x))*(1 - tanh(x))
+	var result = [];
+	var t = tanh(x);
+	for(var i = 0; i < t.length; i++){
+		result.push((1 + t[i]) * (1 - t[i]));
+	}
+	return result;
 }
 
 function rand(rows, cols){
@@ -72,25 +81,35 @@ function rand(rows, cols){
 	return result;
 }
 
-function ones(x1, x2){
+function ones(x1, x2=0){
 	var result = [];
+
 	for(var i = 0; i < x1; i++){
+		if(x2==0){
+			result.push(1);
+			continue;
+		}
 		var arr = [];
-		for(var j = 0; j < x2; i++){
+		for(var j = 0; j < x2; j++){
 			arr.push(1);
 		}
 		result.push(arr);
 	}
+
 	return result;
 }
 
 function transpose(array){
 	var result = [];
 
+	if(array[0].length == undefined){
+		return array;
+	}
+
 	for(var i = 0; i < array[0].length; i++){
 		var arr = [];
 		for(var j = 0; j < array.length; j++){
-			arr.push(array[i][j]);
+			arr.push(array[j][i]);
 		}
 		result.push(arr);
 	}
@@ -101,6 +120,15 @@ function transpose(array){
 function concatenate(arr1, arr2){
 	var result = [];
 
+	if(arr1[0].length == undefined){
+		for(var i = 0; i < arr1.length; i++){
+			result.push(arr1[i]);
+		}
+		for(var i = 0; i < arr2.length; i++){
+			result.push(arr2[i]);
+		}
+		return result;
+	}
 	for(var i = 0; i < arr1.length; i++){
 		var arr = [];
 		for(var j = 0; j < arr1[i].length; j++){
@@ -164,14 +192,14 @@ function multiplyTwoByOne(a, b){
 		b = temp;
 	}
 
-	if(a[0].length != b.length){
+	if(a.length != b.length){
 		throw "Dimensions don't match: "+a[0].length+" != "+b.length;
 	}
 
-	for(var i = 0; i < a.length; i++){
+	for(var i = 0; i < a[0].length; i++){
 		var sum = 0;
-		for(var j = 0; j < a[0].length; j++){
-			sum += a[i][j] * b[j];
+		for(var j = 0; j < a.length; j++){
+			sum += a[j][i] * b[j];
 		}
 		result.push(sum);
 	}
