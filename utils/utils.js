@@ -5,6 +5,12 @@ const TYPE = {
 	LABELS : 1
 };
 
+Array.prototype.multiply = function(val) {return multiply(this, val) };
+Array.prototype.divide = function(val) {return divide(this, val) };
+Array.prototype.add = function(val) {return add(this, val) };
+Array.prototype.subtract = function(val) {return subtract(this, val) };
+Array.prototype.dot = function(arr) { return dot(this, arr)};
+
 function parseDataset(filename, type=TYPE.IMAGES){
 	var fileBuffer = fs.readFileSync(filename);
 
@@ -67,6 +73,166 @@ function tanh_derivative(x){
 		result.push((1 + t[i]) * (1 - t[i]));
 	}
 	return result;
+}
+
+function multiply(arr, val){
+	if(val.length != undefined){
+		return multiplyArrays(arr, val);
+	}
+
+	for(var i = 0; i < arr.length; i++){
+		if(arr[i].length == undefined){
+			arr[i] *= val;
+		}
+		else{
+			arr[i] = multiply(arr[i], val);
+		}
+	}
+
+	return arr;
+}
+
+function multiplyArrays(arr1, arr2){
+	for(var i = 0; i < arr1.length; i++){
+		if(arr1[i].length == undefined){
+			if(arr2[Math.min(i, arr2.length-1)].length == undefined){
+				arr1[i] *= arr2[Math.min(i, arr2.length-1)];
+			}
+			else{
+				arr1[i] = multiplyArrays(arr2, arr1[i]);
+			}
+		}
+		else{
+			if(arr2[Math.min(i, arr2.length-1)].length == undefined){
+				arr1[i] = multiplyArrays(arr1[i], arr2);
+			}
+			else{
+				arr1[i] = multiplyArrays(arr1[i], arr2[Math.min(i, arr2.length-1)]);
+			}
+		}
+	}
+	
+	return arr1;
+}
+
+function divide(arr, val){
+	if(val.length != undefined){
+		return divideArrays(arr, val);
+	}
+
+	for(var i = 0; i < arr.length; i++){
+		if(arr[i].length == undefined){
+			arr[i] /= val;
+		}
+		else{
+			arr[i] = divide(arr[i], val);
+		}
+	}
+
+	return arr;
+}
+
+function divideArrays(arr1, arr2){
+	for(var i = 0; i < arr1.length; i++){
+		if(arr1[i].length == undefined){
+			if(arr2[Math.min(i, arr2.length-1)].length == undefined){
+				arr1[i] /= arr2[Math.min(i, arr2.length-1)];
+			}
+			else{
+				arr1[i] = divideArrays(arr2, arr1[i]);
+			}
+		}
+		else{
+			if(arr2[Math.min(i, arr2.length-1)].length == undefined){
+				arr1[i] = divideArrays(arr1[i], arr2);
+			}
+			else{
+				arr1[i] = divideArrays(arr1[i], arr2[Math.min(i, arr2.length-1)]);
+			}
+		}
+	}
+	
+	return arr1;
+}
+
+function add(arr, val){
+	if(val.length != undefined){
+		return addArrays(arr, val);
+	}
+
+	for(var i = 0; i < arr.length; i++){
+		if(arr[i].length == undefined){
+			arr[i] += val;
+		}
+		else{
+			arr[i] = add(arr[i], val);
+		}
+	}
+
+	return arr;
+}
+
+function addArrays(arr1, arr2){
+	for(var i = 0; i < arr1.length; i++){
+		if(arr1[i].length == undefined){
+			if(arr2[Math.min(i, arr2.length-1)].length == undefined){
+				arr1[i] += arr2[Math.min(i, arr2.length-1)];
+			}
+			else{
+				arr1[i] = addArrays(arr2, arr1[i]);
+			}
+		}
+		else{
+			if(arr2[Math.min(i, arr2.length-1)].length == undefined){
+				arr1[i] = addArrays(arr1[i], arr2);
+			}
+			else{
+				arr1[i] = addArrays(arr1[i], arr2[Math.min(i, arr2.length-1)]);
+			}
+		}
+	}
+	
+	return arr1;
+}
+
+function subtract(arr, val){
+	if(val.length != undefined){
+		return subtractArrays(arr, val);
+	}
+
+	for(var i = 0; i < arr.length; i++){
+		if(arr[i].length == undefined){
+			arr[i] -= val;
+		}
+		else{
+			arr[i] = subtract(arr[i], val);
+		}
+	}
+
+	return arr;
+}
+
+function subtractArrays(arr1, arr2){
+	for(var i = 0; i < arr1.length; i++){
+		if(arr1[i].length == undefined){
+			if(arr2[Math.min(i, arr2.length-1)].length == undefined){
+				arr1[i] -= arr2[Math.min(i, arr2.length-1)];
+			}
+			else{
+				arr1[i] = subtractArrays(arr2, arr1[i]);
+			}
+		}
+		else{
+			if(arr2[Math.min(i, arr2.length-1)].length == undefined){
+				arr1[i] = subtractArrays(arr1[i], arr2);
+			}
+			else{
+				arr1[i] = subtractArrays(arr1[i], arr2[Math.min(i, arr2.length-1)]);
+			}
+		}
+	}
+	
+	return arr1;
 }
 
 function rand(rows, cols){
@@ -143,7 +309,7 @@ function concatenate(arr1, arr2){
 	return result;
 }
 
-function multiply(a, b){
+function dot(a, b){
 	var aNumRows = a.length, aNumCols = a[0].length,
 		bNumRows = b.length, bNumCols = b[0].length,
 		m = new Array(aNumRows);
@@ -154,11 +320,11 @@ function multiply(a, b){
 	}
 
 	if(dims.cols == 0 && dims.rows == 0){
-		return multiplyOneByOne(a, b);
+		return dotOneByOne(a, b);
 	}
 
 	if(dims.cols == 0 || dims.rows == 0){
-		return multiplyTwoByOne(a, b);
+		return dotTwoByOne(a, b);
 	}
 	for (var r = 0; r < aNumRows; ++r) {
 		m[r] = new Array(bNumCols);
@@ -172,9 +338,9 @@ function multiply(a, b){
 	return m;
 }
 
-function multiplyOneByOne(a, b){
+function dotOneByOne(a, b){
 	if(a.length != b.length){
-		throw "Dimensions don't match: "+a.length+" != "+b.length;
+		throw new Error("Dimensions don't match: "+a.length+" != "+b.length);
 	}
 	var result = 0;
 	for(var i = 0 ; i < a.length; i++){
@@ -184,7 +350,7 @@ function multiplyOneByOne(a, b){
 	return result;
 }
 
-function multiplyTwoByOne(a, b){
+function dotTwoByOne(a, b){
 	var result = [];
 	if(a[0].length == undefined){
 		var temp = a;
@@ -193,7 +359,7 @@ function multiplyTwoByOne(a, b){
 	}
 
 	if(a.length != b.length){
-		throw "Dimensions don't match: "+a[0].length+" != "+b.length;
+		throw new Error("Dimensions don't match: "+a[0].length+" != "+b.length);
 	}
 
 	for(var i = 0; i < a[0].length; i++){
@@ -208,7 +374,6 @@ function multiplyTwoByOne(a, b){
 }
 
 module.exports = {
-	multiply: multiply,
 	type: TYPE,
 	parseDataset: parseDataset,
 	concatenate: concatenate,
