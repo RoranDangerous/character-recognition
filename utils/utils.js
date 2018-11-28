@@ -9,11 +9,11 @@ Array.prototype.multiply = function(val) {return multiply(this, val) };
 Array.prototype.divide = function(val) {return divide(this, val) };
 Array.prototype.add = function(val) {return add(this, val) };
 Array.prototype.subtract = function(val) {return subtract(this, val) };
-Array.prototype.dot = function(arr) { return dot(this, arr)};
+Array.prototype.dot = function(arr) { return dot(this, arr) };
+Array.prototype.sum = function() { return this.reduce((a,b) => a + b, 0) };
 
 function parseDataset(filename, type=TYPE.IMAGES){
 	var fileBuffer = fs.readFileSync(filename);
-
 	var magicNumber = hexArrayToNumber(fileBuffer.slice(0,4));
 	var numItems = hexArrayToNumber(fileBuffer.slice(4,8));
 	var dims = {
@@ -32,21 +32,21 @@ function parseDataset(filename, type=TYPE.IMAGES){
 
 	fileBuffer = fileBuffer.slice(startIndex);
 
-	var data = [];
-
-	for (var item = 0; item < numItems; item++) { 
-		var pixels = [];
+	return { magicNumber: magicNumber, length: numItems, dims: dims, data: fileBuffer};
 	
-		for (var x = 0; x < dims.height; x++) {
-				for (var y = 0; y < dims.width; y++) {
-						pixels.push(fileBuffer[(item * dims.height * dims.width) + (x + (y * 28))]);
-				}
-		}
+	// var data = [];
 
-		data.push(pixels);
-	}
+	// for (var item = 0; item < numItems; item++) { 
+	// 	var pixels = [];
+	
+	// 	for (var x = 0; x < dims.height; x++) {
+	// 			for (var y = 0; y < dims.width; y++) {
+	// 					pixels.push(fileBuffer[(item * dims.height * dims.width) + (x + (y * 28))]);
+	// 			}
+	// 	}
 
-	return { magicNumber: magicNumber, length: numItems, dims: dims, data: data};
+	// 	data.push(pixels);
+	// }
 }
 
 function hexArrayToNumber(hex){
@@ -56,6 +56,20 @@ function hexArrayToNumber(hex){
 	}
 
 	return parseInt(result);
+}
+
+function softmax(x){
+	var result = [];
+	var exp = [];
+	for(var i = 0; i < x.length; i++){
+		exp.push(Math.exp(x[i]));
+	}
+
+	var exp_sum = exp.sum();
+	for(var i = 0; i < exp.length; i++){
+		result.push(exp[i] / exp_sum);
+	}
+	return result;
 }
 
 function tanh(x){
@@ -71,6 +85,23 @@ function tanh_derivative(x){
 	var t = tanh(x);
 	for(var i = 0; i < t.length; i++){
 		result.push((1 + t[i]) * (1 - t[i]));
+	}
+	return result;
+}
+
+function sigmoid(x){
+	var result = [];
+	for(var i = 0; i < x.length; i ++){
+		result.push(1 / (1 + Math.exp(-x[i])));
+	}
+	return result;
+}
+
+function sigmoid_derivative(x){
+	var result = [];
+	var sig = sigmoid(x);
+	for(var i = 0; i < sig.length; i++){
+		result.push(sig[i] * (1 - sig[i]));
 	}
 	return result;
 }
@@ -373,13 +404,26 @@ function dotTwoByOne(a, b){
 	return result;
 }
 
+function numberToBinArray(num, max_len=4){
+	var result = [];
+
+	for (var i = 0; i < max_len; i++)
+		result[max_len - 1 - i] = (num >> i) & 1;
+
+	return result;
+}
+
 module.exports = {
 	type: TYPE,
 	parseDataset: parseDataset,
 	concatenate: concatenate,
 	transpose: transpose,
+	softmax: softmax,
 	ones: ones,
 	tanh: tanh,
 	tanh_derivative: tanh_derivative,
-	rand: rand
+	sigmoid: sigmoid,
+	sigmoid_derivative: sigmoid_derivative,
+	rand: rand,
+	numberToBinArray: numberToBinArray
 };
