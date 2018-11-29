@@ -58,6 +58,23 @@ function hexArrayToNumber(hex){
 	return parseInt(result);
 }
 
+function saveToFile(filepath, data){
+	fs.writeFile(filepath, data, function(err) {
+		if(err) {
+				return console.log(err);
+		}
+	}); 
+}
+
+function loadFromFile(filepath, cb){
+	fs.readFile(filepath, 'utf8', function (err,data) {
+		if (err) {
+			return console.log(err);
+		}
+		return cb(data);
+	});
+}
+
 function softmax(x){
 	var result = [];
 	var exp = [];
@@ -415,6 +432,8 @@ function numberToBinArray(num, max_len=4){
 
 module.exports = {
 	type: TYPE,
+	saveToFile: saveToFile,
+	loadFromFile: loadFromFile,
 	parseDataset: parseDataset,
 	concatenate: concatenate,
 	transpose: transpose,
