@@ -120,4 +120,87 @@ class NeuralNetwork{
 	}
 }
 
-module.exports = NeuralNetwork;
+class NeuralNetwork2{
+	fit(X, y){
+		X = X.divide(255);
+		var digits = 10;
+		var examples = y.shape()[0];
+		X = X.reshape([examples, 784])
+		y = y.reshape([1, examples]);
+		var Y_new = utils.eye(digits, y);
+		Y_new = utils.transpose(Y_new).reshape([digits, examples])
+
+		var m = 45;
+		var m_test = X.shape()[0] - m;
+
+		var X_train = utils.transpose(X.slice(0, m));
+		var X_test = utils.transpose(X.slice(m));
+		var Y_train = [];
+		var Y_test = [];
+		for(var i = 0; i < Y_new.length; i++){
+			Y_train.push(Y_new[i].slice(0, m));
+			Y_test.push(Y_new[i].slice(m));
+		}
+
+		var n_x = X_train.shape()[0];
+		var n_h = 64;
+		var learning_rate = 1;
+
+		var W1 = utils.rand(n_h, n_x);
+		var b1 = utils.zeros([n_h, 1]);
+		var W2 = utils.rand(digits, n_h);
+		var b2 = utils.zeros([digits, 1]);
+
+		X = X_train;
+		var Y = Y_train;
+
+		for(var i = 0; i < 1; i++){
+			var Z1 = W1.dot(X).add(b1);
+			var A1 = utils.sigmoid(Z1);
+			var Z2 = W2.dot(A1).add(b2);
+			var A2 = utils.softmax(Z2);
+
+			var cost = this.compute_multiclass_loss(Y, A2);
+
+			var dZ2 = A2.subtract(Y);
+			var dW2 = dZ2.dot(utils.transpose(A1)).multiply(1/m);
+			var db2 = []
+			for(var j = 0; j < dZ2.length; j++){
+				db2.push([dZ2[j].sum()].multiply(1/m));
+			}
+			
+			var dA1 = utils.transpose(W2).dot(dZ2);
+			var dZ1 = dA1.multiply(utils.sigmoid_derivative(Z1));
+
+			var dW1 = dZ1.mult(utils.transpose(X)).multiply(1/m);
+			console.log(dZ1.shape())
+			console.log(utils.transpose(X).shape())
+			console.log(dW1)
+			var db1 = []
+			for(var j = 0; j < dZ1.length; j++){
+				db1.push([dZ1[j].sum()].multiply(1/m));
+			}
+			//console.log(db1);
+
+			W2 = W2.subtract(dW2.multiply(learning_rate));
+			b2 = b2.subtract(db2.multiply(learning_rate));
+			W1 = W1.subtract(dW1.multiply(learning_rate));
+			b1 = b1.subtract(db1.multiply(learning_rate));
+
+			if( i % 10 == 0){
+				console.log("Epoch "+i+" cost: "+ cost);
+			}
+		}
+		console.log("Final cost: "+cost);
+	}
+
+	compute_multiclass_loss(Y, Y_hat){
+		var L_sum = Y.multiply(utils.log(Y_hat)).sum();
+		var m = Y.shape()[1];
+		var L = L_sum * -(1/m);
+
+		return L;
+	}
+}
+
+module.exports = NeuralNetwork2;

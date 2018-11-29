@@ -11,8 +11,12 @@ Array.prototype.add = function(val) {return add(this, val) };
 Array.prototype.subtract = function(val) {return subtract(this, val) };
 Array.prototype.dot = function(arr) { return dot(this, arr) };
 Array.prototype.sum = function() { return this.reduce((a,b) => a + b, 0) };
+Array.prototype.product = function() { return this.reduce((a,b) => a * b, 1) };
+Array.prototype.reshape = function(s) { return reshape(this, s) };
+Array.prototype.shape = function() { return shape(this) };
+Number.prototype.subtract = function(arr) { return numberSubtract(this, arr) };
 
-function parseDataset(filename, type=TYPE.IMAGES){
+function parseDataset(filename, type=TYPE.IMAGES, maxSize=-1){
 	var fileBuffer = fs.readFileSync(filename);
 	var magicNumber = hexArrayToNumber(fileBuffer.slice(0,4));
 	var numItems = hexArrayToNumber(fileBuffer.slice(4,8));
@@ -30,7 +34,8 @@ function parseDataset(filename, type=TYPE.IMAGES){
 		startIndex = 16;
 	}
 
-	fileBuffer = fileBuffer.slice(startIndex);
+	var end = startIndex + (maxSize == -1 ? fileBuffer.length : (maxSize * dims.height * dims.width));
+	fileBuffer = Array.prototype.slice.call(fileBuffer, startIndex, end);
 
 	return { magicNumber: magicNumber, length: numItems, dims: dims, data: fileBuffer};
 	
@@ -60,6 +65,12 @@ function hexArrayToNumber(hex){
 
 function softmax(x){
 	var result = [];
+	if(x[0].length != undefined){
+		for(var i = 0; i < x.length; i++){
+			result.push(softmax(x[i]));
+		}
+		return result;
+	}
 	var exp = [];
 	for(var i = 0; i < x.length; i++){
 		exp.push(Math.exp(x[i]));
@@ -91,6 +102,12 @@ function tanh_derivative(x){
 
 function sigmoid(x){
 	var result = [];
+	if(x[0].length != undefined){
+		for(var i = 0; i < x.length; i++){
+			result.push(sigmoid(x[i]));
+		}
+		return result;
+	}
 	for(var i = 0; i < x.length; i ++){
 		result.push(1 / (1 + Math.exp(-x[i])));
 	}
@@ -100,8 +117,14 @@ function sigmoid(x){
 function sigmoid_derivative(x){
 	var result = [];
 	var sig = sigmoid(x);
-	for(var i = 0; i < sig.length; i++){
-		result.push(sig[i] * (1 - sig[i]));
+	return sig.multiply((1).subtract(sig));
+}
+
+function shape(arr){
+	var result = [];
+	result.push(arr.length);
+	if(arr[0].length != undefined){
+		result = [...result, ...shape(arr[0])];
 	}
 	return result;
 }
@@ -203,6 +226,44 @@ function add(arr, val){
 	return arr;
 }
 
+function reshape(arr, shape, index=0){
+	// if(arr.shape().product() != shape.product()){
+	// 	throw new Error("Reshaping array with shape ("+arr.shape()+") to ("+shape+") failed.");
+	// }
+	var result = [];
+	if(shape.length == 1){
+		for(var i = 0; i < shape[0]; i++){
+			result.push(getIth(arr, index+i));
+		}
+		return result;
+	}
+
+	for(var i = 0; i < shape[0]; i++){
+		result.push(reshape(arr, shape.slice(1), i*shape.slice(1).product()));
+	}
+	return result;
+
+	for(var i = 0; i < rows; i++){
+		var row = [];
+		for(var j = 0; j < cols; j++){
+			var element = getIth(arr, (i*cols)+j);
+			row.push(element);
+		}
+		result.push(row);
+	}
+	return result;
+}
+
+function getIth(arr, index){
+	if(arr[0].length == undefined){
+		return arr[index];
+	}
+	var shape = arr.shape();
+	var elementsInRow = shape.slice(1).product();
+	var ind = Math.floor(index / elementsInRow);
+	return getIth(arr[ind], index - (ind * elementsInRow));
+}
+
 function addArrays(arr1, arr2){
 	for(var i = 0; i < arr1.length; i++){
 		if(arr1[i].length == undefined){
@@ -266,12 +327,27 @@ function subtractArrays(arr1, arr2){
 	return arr1;
 }
 
+function numberSubtract(num, arr){
+	var result = [];
+	if(arr[0].length != undefined){
+		for(var i = 0; i < arr.length; i++){
+			result.push(numberSubtract(num, arr[i]));
+		}
+		return result;
+	}
+
+	for(var i = 0; i < arr.length; i++){
+		result.push(num - arr[i]);
+	}
+	return result;
+}
+
 function rand(rows, cols){
 	var result = [];
 	for(var i = 0; i < rows; i++){
 		var arr = [];
 		for(var j = 0; j < cols; j++){
-			arr.push(2*Math.random() - 1);
+			arr.push(2 * Math.random() - 1);
 		}
 		result.push(arr);
 	}
@@ -296,22 +372,50 @@ function ones(x1, x2=0){
 	return result;
 }
 
-function transpose(array){
+function zeros(shape){
 	var result = [];
-
-	if(array[0].length == undefined){
-		return array;
+	if(shape.length == 1){
+		for(var i = 0; i < shape[0]; i++){
+			result.push(0);
+		}
+		return result;
 	}
 
-	for(var i = 0; i < array[0].length; i++){
-		var arr = [];
-		for(var j = 0; j < array.length; j++){
-			arr.push(array[j][i]);
-		}
-		result.push(arr);
+	for(var i = 0; i < shape[0]; i++){
+		result.push(zeros(shape.slice(1)));
 	}
 
 	return result;
+}
+
+function transpose(arr){
+	var result = [];
+
+	var shape = arr.shape();
+	for(var j = 0; j < shape[shape.length-1]; j++){
+		for(var i = j; i < shape.product(); i += shape[shape.length-1]){
+			result.push(getIth(arr, i));
+		}
+	}
+
+	var tShape = [...shape];
+	shape[0] = tShape[tShape.length-1];
+	shape[shape.length-1] = tShape[0];
+	return result.reshape(shape);
+
+	// if(array[0].length == undefined){
+	// 	return array;
+	// }
+
+	// for(var i = 0; i < array[0].length; i++){
+	// 	var arr = [];
+	// 	for(var j = 0; j < array.length; j++){
+	// 		arr.push(array[j][i]);
+	// 	}
+	// 	result.push(arr);
+	// }
+
+	// return result;
 }
 
 function concatenate(arr1, arr2){
@@ -404,6 +508,74 @@ function dotTwoByOne(a, b){
 	return result;
 }
 
+function mult(a, b){
+	if (a[0].length != b.length) {
+		throw new Error("error: incompatible sizes");
+	}
+
+	var result = [];
+	for (var i = 0; i < a.length; i++) {
+			var row = [];
+			for (var j = 0; j < b[0].length; j++) {
+					var sum = 0;
+					for (var k = 0; k < a[0].length; k++) {
+							sum += a[i][k] * b[k][j];
+					}
+					row.push(sum);
+			}
+			result.push(row);
+	}
+	return result; 
+}
+
+function eye(num, arr=undefined){
+	var result = [];
+	if(arr == undefined){
+		return eyeNum(num);
+	}
+
+	if(arr[0].length != undefined){
+		result.push(eye(num, arr[0]));
+		return result;
+	}
+
+	for(var i = 0; i < arr.length; i++){
+		var row = [];
+		for(var j = 0; j < num; j++){
+			row.push(j == arr[i] ? 1 : 0);
+		}
+		result.push(row);
+	}
+	return result;
+}
+
+function eyeNum(num){
+	var result = [];
+	for(var i = 0; i < num; i++){
+		var row = [];
+		for(var j = 0; j < num; j++){
+			row.push(j == i ? 1 : 0);
+		}
+		result.push(row);
+	}
+	return result;
+}
+
+function log(arr){
+	var result = [];
+	if(arr[0].length != undefined){
+		for(var i = 0; i < arr.length; i++){
+			result.push(log(arr[i]));
+		}
+		return result;
+	}
+
+	for(var i = 0; i < arr.length; i++){
+		result.push(Math.log(arr[i]));
+	}
+	return result;
+}
+
 function numberToBinArray(num, max_len=4){
 	var result = [];
 
@@ -420,10 +592,14 @@ module.exports = {
 	transpose: transpose,
 	softmax: softmax,
 	ones: ones,
+	zeros: zeros,
 	tanh: tanh,
 	tanh_derivative: tanh_derivative,
 	sigmoid: sigmoid,
 	sigmoid_derivative: sigmoid_derivative,
 	rand: rand,
+	eye: eye,
+	log: log,
+	mult: mult,
 	numberToBinArray: numberToBinArray
 };

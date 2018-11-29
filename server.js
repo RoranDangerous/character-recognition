@@ -21,19 +21,28 @@ app.post('/', function (req, res) {
 // 	console.log('Example app listening on port 3000!');
 // })
 
-var data = utils.parseDataset('emnist-digits-train-images-idx3-ubyte', utils.type.IMAGES);
-data.labels = utils.parseDataset('emnist-digits-train-labels-idx1-ubyte', utils.type.LABELS).data;
-// var labels = utils.parseDataset('emnist-digits-train-labels-idx1-ubyte', utils.type.LABELS);
+var dataSize = 50;
+var dataset = utils.parseDataset('emnist-digits-train-images-idx3-ubyte', utils.type.IMAGES, dataSize);
+dataset.labels = utils.parseDataset('emnist-digits-train-labels-idx1-ubyte', utils.type.LABELS, dataSize).data;
 
-var nn = new NeuralNetwork([784, 50, 10, 10])
-//var X = [data.data.slice((0 * 28 * 28), 1*28*28)].divide(255);
-var X = data.data;
-// var y = [0, 1, 1, 0];
-var y = data.labels
+// var arr = [0,0,0,0,0,0,0,0,0,0]
+// for(var i = 0; i < 50; i++){
+// 	arr[dataset.labels[i]]++;
+// }
 
-nn.fitByIndex(X, y, learning_rate=0.1, epochs=100)
+// for(var i = 0; i < arr.length; i++){
+// 	console.log(i+": "+arr[i])
+// }
+var nn = new NeuralNetwork();
+nn.fit(dataset.data, dataset.labels)
 
-console.log("Final prediction")
-for(var i = 0; i < 5; i++){
-	console.log(data.labels[i], nn.predict_single_data(Array.prototype.slice.call(data.data, (i * 28 * 28), (i+1)*28*28).divide(255)));
-}
+// var nn = new NeuralNetwork([784, 50, 10, 10])
+// var X = data.data;
+// var y = data.labels
+
+// nn.fitByIndex(X, y, learning_rate=0.1, epochs=100)
+
+// console.log("Final prediction")
+// for(var i = 0; i < 5; i++){
+// 	console.log(data.labels[i], nn.predict_single_data(Array.prototype.slice.call(data.data, (i * 28 * 28), (i+1)*28*28).divide(255)));
+// }
