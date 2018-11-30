@@ -526,6 +526,7 @@ class Atrament {
 	// Refactored below.
 
 	scaleDown() {
+		console.log("ScaleDown")
 		const originalCanvas = document.getElementById('original');
 		const boundedCanvas = document.getElementById('bounded');
 		// const centeredCanvas = document.getElementById('centered');
@@ -766,6 +767,10 @@ class Atrament {
 
 		return {transX: dX, transY: dY};
 	}
+}
+
+function clearDrawing(){
+	sketcher.context.clearRect(0,0, sketcher.canvas.width, sketcher.canvas.height);
 }
 
 var sketcher = new Atrament('#original')

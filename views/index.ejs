@@ -11,9 +11,19 @@
 			<canvas id="original" width="100px" height="100px"></canvas>
 			<canvas id="bounded" width="100px" height="100px" style="display: none"></canvas>
 			<canvas id="mnist" width="28px" height="28px" style="display:none"></canvas>
+			<button onclick="clearDrawing()">Clear</button>
 		</div>
 		<h1 id="output"></h1>
 		
 		<script src="/js/functions.js"></script>
+		<script>
+			// function clearDrawing(){
+			// 	console.log("Clearing");
+			// 	const originalCanvas = document.getElementById('original');
+			// 	const originalCtx = originalCanvas.getContext('2d');
+
+			// 	originalCtx.clearRect(0,0, originalCanvas.width, originalCanvas.length);
+			// }
+		</script>
 	</body>
 </html>
