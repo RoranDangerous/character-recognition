@@ -1,21 +1,42 @@
 const utils = require('./utils');
 
 class NeuralNetwork{
-	constructor(net_arch){
+	constructor(arg){
+		if(typeof arg == "string"){
+			this.loadFromFile(arg);
+			return;
+		}
+		
+		this.loadFromShape(arg);
+	}
+
+	loadFromFile(filePath){
+		utils.loadFromFile(filePath, (data) => {
+			var data = JSON.parse(data);
+			this.loadFromShape(data.shape, data.weights);
+		});
+	}
+
+	loadFromShape(shape, weights=undefined){
 		this.activity = utils.sigmoid;
 		this.activity_derivative = utils.sigmoid_derivative;
-		this.layers = net_arch.length;
+		this.layers = shape.length;
 		this.steps_per_epoch = 1000;
-		this.arch = net_arch;
+		this.arch = shape;
 		this.weights = [];
 
-		for(var layer = 0; layer < this.layers-1; layer++){
-			var w = utils.rand(net_arch[layer] + 1, net_arch[layer+1]);
-			this.weights.push(w);
+		if(weights == undefined){
+			for(var layer = 0; layer < this.layers-1; layer++){
+				var w = utils.rand(shape[layer] + 1, shape[layer+1]);
+				this.weights.push(w);
+			}
+		}
+		else{
+			this.weights = weights;
 		}
 	}
 
-	fit(data, labels, learning_rate=0.1, epochs=100){
+	fit(data, labels, learning_rate=0.1, epochs=100, filePath=undefined){
 		this.learning_rate = learning_rate;
 
 		var Z = this.addBias(data);
@@ -34,6 +55,10 @@ class NeuralNetwork{
 			delta_vec.reverse();
 
 			this.update_weights(y, delta_vec);
+		}
+
+		if(filePath){
+			utils.saveToFile(filePath, JSON.stringify({shape:this.arch, weights:this.weights}));
 		}
 	}
 
@@ -109,6 +134,7 @@ class NeuralNetwork{
 	}
 
 	predict_single_data(x){
+		x = x.divide(255);
 		var result = utils.concatenate(utils.transpose(utils.ones(1)), x);
 
 		for(var i = 0 ; i < this.weights.length; i++){

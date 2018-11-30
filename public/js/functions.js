@@ -545,8 +545,7 @@ class Atrament {
 		
 		const data = imgData.data;
 		const pixels = [[]];
-		
-		console.log(pixels);
+
 		
 		let row = 0;
 		let column = 0;
@@ -569,7 +568,6 @@ class Atrament {
 		}
 		
 		const boundingRectangle = this.getBoundingRectangle(pixels);
-		console.log({boundingRectangle});
 		
 		
 		const array = pixels.reduce(
@@ -597,7 +595,6 @@ class Atrament {
 		
 		// Vector that shifts an image to the center of the mass.
 		const trans = this.centerImage(pixels); // [dX, dY] to center of mass
-		console.log({trans});
 
 	// copy image to hidden canvas, translate to center-of-mass, then
 	// scale to fit into a 200x200 box (see MNIST calibration notes on
@@ -702,9 +699,8 @@ class Atrament {
 		}
 		var xhttp = new XMLHttpRequest();
 		xhttp.onreadystatechange = function() {
-			console.log(this);
 			if (this.readyState == 4 && this.status == 200) {
-				document.getElementById("output").innerHTML = this.responseText;
+				document.getElementById("output").innerHTML = "Predicted number: "+this.responseText;
 			}
 		};
 		xhttp.open("POST", "/predict", true);

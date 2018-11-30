@@ -33,20 +33,16 @@ function parseDataset(filename, type=TYPE.IMAGES){
 	fileBuffer = fileBuffer.slice(startIndex);
 
 	return { magicNumber: magicNumber, length: numItems, dims: dims, data: fileBuffer};
-	
-	// var data = [];
+}
 
-	// for (var item = 0; item < numItems; item++) { 
-	// 	var pixels = [];
-	
-	// 	for (var x = 0; x < dims.height; x++) {
-	// 			for (var y = 0; y < dims.width; y++) {
-	// 					pixels.push(fileBuffer[(item * dims.height * dims.width) + (x + (y * 28))]);
-	// 			}
-	// 	}
-
-	// 	data.push(pixels);
-	// }
+function reshapeImage(img, w=28, h=28){
+	var result = [];
+	for (var x = 0; x < w; x++) {
+			for (var y = 0; y < h; y++) {
+				result.push(img[(x + (y * 28))]);
+			}
+	}
+	return result;
 }
 
 function hexArrayToNumber(hex){
@@ -435,6 +431,7 @@ module.exports = {
 	saveToFile: saveToFile,
 	loadFromFile: loadFromFile,
 	parseDataset: parseDataset,
+	reshapeImage: reshapeImage,
 	concatenate: concatenate,
 	transpose: transpose,
 	softmax: softmax,
