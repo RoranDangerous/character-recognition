@@ -8,12 +8,12 @@
 	</head>
 	<body>
 		<div class="container">
-			<fieldset>
-				<form action="/" method="post">
-					<input name="city" type="text" class="ghost-input" placeholder="Enter a City" required>
-					<input type="submit" class="ghost-button" value="Get Weather">
-				</form>
-			</fieldset>
+			<canvas id="original" width="100px" height="100px"></canvas>
+			<canvas id="bounded" width="100px" height="100px" style="display: none"></canvas>
+			<canvas id="mnist" width="28px" height="28px" style="display:none"></canvas>
 		</div>
+		<h1 id="output"></h1>
+		
+		<script src="/js/functions.js"></script>
 	</body>
 </html>
