@@ -8,22 +8,38 @@
 	</head>
 	<body>
 		<div class="container">
+			Layers: <input type="text" id="layers" placeholder="200,50,25,..."><br>
+			Learning rate: <input type="text" id="learning_rate" placeholder="Leaning rate" value="0.1"><br>
+			Episodes: <input type="text" id="episodes" placeholder="Number of episodes" value="10"><br>
+			<div style="width: 100%">
+				<input type="button" onclick="train()" value="Train">
+			</div>
+			<br>
 			<canvas id="original" width="100px" height="100px"></canvas>
 			<canvas id="bounded" width="100px" height="100px" style="display: none"></canvas>
 			<canvas id="mnist" width="28px" height="28px" style="display:none"></canvas>
 			<button onclick="clearDrawing()">Clear</button>
 		</div>
 		<h1 id="output"></h1>
+		<h1 id="progress"></h1>
 		
 		<script src="/js/functions.js"></script>
 		<script>
-			// function clearDrawing(){
-			// 	console.log("Clearing");
-			// 	const originalCanvas = document.getElementById('original');
-			// 	const originalCtx = originalCanvas.getContext('2d');
-
-			// 	originalCtx.clearRect(0,0, originalCanvas.width, originalCanvas.length);
-			// }
+			function train(){
+				var layers = document.getElementById("layers").value;
+				var learning_rate = document.getElementById("learning_rate").value;
+				var episodes = document.getElementById("episodes").value;
+				document.getElementById("progress").innerHTML = "Training...";
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						document.getElementById("progress").innerHTML = this.responseText;
+					}
+				};
+				xhttp.open("POST", "/train", true);
+				xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				xhttp.send("layers="+layers+"&learning_rate="+learning_rate+"&episodes="+episodes);
+			}
 		</script>
 	</body>
 </html>

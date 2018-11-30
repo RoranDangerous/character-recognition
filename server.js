@@ -36,6 +36,15 @@ app.post('/predict', function (req, res) {
 	res.end(""+maxIndex);
 })
 
+app.post('/train', function (req, res) {
+	var layers = [ 784, ...req.body.layers.split(',').map(el => parseInt(el)), 10];
+	nn = new NeuralNetwork(layers);
+	console.log(req.body.episodes);
+	nn.fitByIndex(X, y, learning_rate=parseFloat(req.body.learning_rate), epochs=parseInt(req.body.episodes));
+	
+	res.end("Finished");
+})
+
 app.listen(3000, function () {
 	console.log('Example app listening on port 3000!');
 })

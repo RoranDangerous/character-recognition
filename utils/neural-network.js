@@ -68,8 +68,9 @@ class NeuralNetwork{
 		var episodes = epochs*this.steps_per_epoch
 
 		for(var k = 0; k < episodes; k++){
-			if(k % 100 == 0)
+			if(k % 100 == 0){
 				console.log("Episode: "+k+"/"+episodes);
+			}
 			// Choosing random input for the forward propagation
 			var sample = Math.floor((Math.random() * labels.length));
 
