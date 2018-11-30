@@ -13,7 +13,7 @@ var nn = new NeuralNetwork(config.weightsFile);
 
 var X = dataset.data;
 var y = dataset.labels
-// nn.fitByIndex(X, y, learning_rate=0.1, epochs=100);
+//nn.fitByIndex(X, y, learning_rate=0.1, epochs=100, config.weightsFile);
 
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));

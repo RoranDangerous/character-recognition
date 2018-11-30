@@ -62,7 +62,7 @@ class NeuralNetwork{
 		}
 	}
 
-	fitByIndex(data, labels, learning_rate=0.1, epochs=100){
+	fitByIndex(data, labels, learning_rate=0.1, epochs=100, filePath=undefined){
 		this.learning_rate = learning_rate;
 
 		var episodes = epochs*this.steps_per_epoch
@@ -88,6 +88,10 @@ class NeuralNetwork{
 			delta_vec.reverse();
 
 			this.update_weights(y, delta_vec);
+		}
+		
+		if(filePath){
+			utils.saveToFile(filePath, JSON.stringify({shape:this.arch, weights:this.weights}));
 		}
 	}
 
